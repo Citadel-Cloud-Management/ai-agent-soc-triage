@@ -1,0 +1,64 @@
+name: Brute Force Response Playbook
+description: Automated detection and response for brute force and credential stuffing attacks.
+category: brute_force
+severity_threshold: medium
+tags:
+  - authentication
+  - credential-attack
+  - T1110
+
+steps:
+  - name: Analyze Login Patterns
+    action: analyze_login_patterns
+    parameters:
+      lookback_hours: 24
+      threshold_failed_attempts: 10
+      group_by:
+        - source_ip
+        - target_account
+
+  - name: Check Source IP Reputation
+    action: check_ip_reputation
+    parameters:
+      engines:
+        - abuseipdb
+        - virustotal
+        - otx
+
+  - name: Geo-Check Source IPs
+    action: geo_check
+    parameters:
+      flag_anomalous_locations: true
+      compare_to_baseline: true
+
+  - name: Block Source IPs
+    action: block_ip
+    parameters:
+      block_type: firewall
+      duration_hours: 24
+      block_entire_range: false
+    condition: "confidence > 0.7 and false_positive_likelihood < 0.3"
+    on_failure: continue
+
+  - name: Lock Targeted Accounts
+    action: lock_accounts
+    parameters:
+      lock_duration_minutes: 30
+      require_admin_unlock: false
+    condition: "severity in ('critical', 'high')"
+    on_failure: continue
+
+  - name: Force Password Reset
+    action: force_password_reset
+    parameters:
+      notify_user: true
+      require_mfa: true
+    condition: "severity == 'critical'"
+    on_failure: continue
+
+  - name: Update Firewall Rules
+    action: update_firewall
+    parameters:
+      rule_type: rate_limit
+      max_attempts_per_minute: 5
+      apply_to: authentication_endpoints

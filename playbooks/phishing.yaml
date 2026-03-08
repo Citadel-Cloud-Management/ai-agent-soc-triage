@@ -1,0 +1,60 @@
+name: Phishing Response Playbook
+description: Automated response workflow for phishing alerts including email analysis, URL scanning, and user notification.
+category: phishing
+severity_threshold: medium
+tags:
+  - email
+  - social-engineering
+  - T1566
+
+steps:
+  - name: Extract Email Artifacts
+    action: extract_email_artifacts
+    parameters:
+      extract_headers: true
+      extract_urls: true
+      extract_attachments: true
+
+  - name: Scan URLs
+    action: scan_urls
+    parameters:
+      engines:
+        - virustotal
+        - urlscan
+      timeout: 30
+
+  - name: Check Sender Reputation
+    action: check_sender_reputation
+    parameters:
+      check_spf: true
+      check_dkim: true
+      check_dmarc: true
+
+  - name: Quarantine Email
+    action: quarantine_email
+    parameters:
+      quarantine_similar: true
+      search_window_hours: 24
+    condition: "confidence > 0.7"
+    on_failure: continue
+
+  - name: Block Sender Domain
+    action: block_sender
+    parameters:
+      block_type: domain
+      duration_hours: 72
+    condition: "severity == 'critical' and confidence > 0.8"
+    on_failure: continue
+
+  - name: Notify User
+    action: notify_affected_user
+    parameters:
+      template: phishing_warning
+      include_guidance: true
+
+  - name: Reset User Credentials
+    action: reset_credentials
+    parameters:
+      force_mfa_reenroll: true
+    condition: "severity == 'critical'"
+    on_failure: abort
