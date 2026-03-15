@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture - ai-agent-soc-triage</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0c0b;color:#f5f2eb;font-family:'SF Mono','Fira Code','Cascadia Code',Consolas,monospace;line-height:1.6;padding:0}
+a{color:#c8420a;text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+h1{font-size:2rem;color:#f5f2eb;margin-bottom:0.5rem}
+h2{font-size:1.4rem;color:#c8420a;margin:2rem 0 1rem;padding-bottom:0.5rem;border-bottom:1px solid #222}
+h3{font-size:1.1rem;color:#f5f2eb;margin:1.5rem 0 0.75rem}
+.badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:4px;font-size:0.8rem;font-weight:600;margin-right:0.5rem;margin-bottom:0.5rem}
+.badge-lang{background:#1a3a1a;color:#4ade80;border:1px solid #2d5a2d}
+.badge-cat{background:#1a1a3a;color:#60a5fa;border:1px solid #2d2d5a}
+.badge-ver{background:#3a1a1a;color:#f87171;border:1px solid #5a2d2d}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1rem 0}
+.card{background:#141514;border:1px solid #222;border-radius:8px;padding:1.25rem;text-align:center}
+.card-value{font-size:1.5rem;color:#c8420a;font-weight:700}
+.card-label{font-size:0.8rem;color:#888;margin-top:0.25rem}
+.arch-diagram{background:#101210;border:1px solid #222;border-radius:8px;padding:2rem;margin:1rem 0;overflow-x:auto}
+.flow-row{display:flex;justify-content:center;align-items:center;gap:0.5rem;margin:0.75rem 0;flex-wrap:wrap}
+.flow-box{background:#1a1a2e;border:2px solid #c8420a;border-radius:6px;padding:0.5rem 1rem;font-size:0.8rem;text-align:center;min-width:120px;color:#f5f2eb}
+.flow-box.accent{background:#c8420a;color:#fff;border-color:#e8520a}
+.flow-box.blue{border-color:#1982c4;background:#0f1f3a}
+.flow-box.green{border-color:#2b9348;background:#0f2a1a}
+.flow-box.purple{border-color:#533483;background:#1a0f2e}
+.flow-arrow{color:#c8420a;font-size:1.2rem;font-weight:bold}
+.flow-arrow-down{display:flex;justify-content:center;color:#c8420a;font-size:1.2rem;font-weight:bold}
+.flow-label{font-size:0.7rem;color:#888;display:block}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.85rem}
+th{background:#1a1a1a;color:#c8420a;padding:0.75rem;text-align:left;border-bottom:2px solid #333;white-space:nowrap}
+td{padding:0.75rem;border-bottom:1px solid #1a1a1a}
+tr:hover{background:#141514}
+code{background:#1a1a1a;padding:0.15rem 0.4rem;border-radius:3px;font-size:0.85rem;color:#e8a060}
+.checklist{list-style:none;padding:0}
+.checklist li{padding:0.4rem 0;padding-left:1.5rem;position:relative}
+.checklist li::before{content:'[ ]';position:absolute;left:0;color:#c8420a;font-weight:bold}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.section-box{background:#141514;border:1px solid #222;border-radius:8px;padding:1.25rem}
+.section-box h3{margin-top:0}
+footer{margin-top:3rem;padding:1.5rem 0;border-top:1px solid #222;text-align:center;font-size:0.75rem;color:#555}
+.env-table td:first-child{color:#4ade80}
+.header-bar{background:#141514;border-bottom:1px solid #222;padding:1.5rem 0}
+.header-bar .container{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.industry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.industry-card{background:#141514;border:1px solid #222;border-radius:8px;padding:1rem}
+.industry-card h4{color:#c8420a;margin-bottom:0.5rem;font-size:0.95rem}
+.industry-card p{font-size:0.8rem;color:#aaa}
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+<div class="container">
+<div>
+<h1>ai-agent-soc-triage</h1>
+<p style="color:#888;margin-top:0.25rem">LLM-powered SOC triage agent for automated security alert analysis, correlation, and response</p>
+</div>
+<div>
+<span class="badge badge-lang">Python 3.11+</span>
+<span class="badge badge-cat">AI/ML</span>
+<span class="badge badge-ver">v0.1.0</span>
+</div>
+</div>
+</div>
+
+<div class="container">
+
+<h2>Executive Summary</h2>
+<p>A Security Operations Center triage agent that uses LangChain and OpenAI to analyze security alerts from multiple SIEM platforms (Splunk, Microsoft Sentinel, Elastic SIEM). The system extracts indicators of compromise (IOCs), classifies alert severity via LLM, correlates events temporally and by IOC, looks up threat intelligence from VirusTotal/AbuseIPDB/OTX, and executes automated response playbooks. Outputs include automated ticketing (Jira/ServiceNow), notifications (Slack/Teams/PagerDuty), and YAML-driven playbook actions such as IP blocking.</p>
+
+<h2>Overview</h2>
+<div class="cards">
+<div class="card"><div class="card-value">Python</div><div class="card-label">Language</div></div>
+<div class="card"><div class="card-value">AI/ML</div><div class="card-label">Category</div></div>
+<div class="card"><div class="card-value">9</div><div class="card-label">Core Dependencies</div></div>
+<div class="card"><div class="card-value">12</div><div class="card-label">Source Modules</div></div>
+<div class="card"><div class="card-value">3</div><div class="card-label">SIEM Connectors</div></div>
+<div class="card"><div class="card-value">MIT</div><div class="card-label">License</div></div>
+</div>
+
+<h2>Architecture Diagram</h2>
+<div class="arch-diagram">
+<div class="flow-row">
+<div class="flow-box accent">Splunk</div>
+<div class="flow-box blue">Microsoft Sentinel</div>
+<div class="flow-box green">Elastic SIEM</div>
+<div class="flow-box purple">Webhook Receiver</div>
+</div>
+<div class="flow-label" style="text-align:center">Alert Ingestion Layer</div>
+<div class="flow-arrow-down">v v v v</div>
+<div class="flow-row">
+<div class="flow-box purple">IOC Extractor<br><span class="flow-label">IPs, Domains, Hashes</span></div>
+</div>
+<div class="flow-arrow-down">v</div>
+<div class="flow-row">
+<div class="flow-box accent">Alert Classifier<br><span class="flow-label">LLM-Powered (GPT-4o)</span></div>
+<div class="flow-arrow">&lt;--&gt;</div>
+<div class="flow-box blue">Threat Intel Lookup<br><span class="flow-label">VT / AbuseIPDB / OTX</span></div>
+</div>
+<div class="flow-arrow-down">v</div>
+<div class="flow-row">
+<div class="flow-box blue">Event Correlator<br><span class="flow-label">Temporal + IOC matching</span></div>
+</div>
+<div class="flow-arrow-down">v</div>
+<div class="flow-row">
+<div class="flow-box green">Playbook Runner<br><span class="flow-label">YAML Playbooks</span></div>
+<div class="flow-box purple">Ticket Creator<br><span class="flow-label">Jira / ServiceNow</span></div>
+<div class="flow-box accent">Notifier<br><span class="flow-label">Slack / Teams / PD</span></div>
+</div>
+<div class="flow-label" style="text-align:center">Automated Response Layer</div>
+<div class="flow-arrow-down">v</div>
+<div class="flow-row">
+<div class="flow-box accent">Triage Result</div>
+</div>
+</div>
+
+<h2>Component Breakdown</h2>
+<table>
+<thead><tr><th>Component</th><th>File</th><th>Purpose</th><th>Key Dependencies</th></tr></thead>
+<tbody>
+<tr><td>Triage Engine</td><td><code>src/triage_engine.py</code></td><td>Main orchestrator -- coordinates the full triage pipeline</td><td>All analyzers, responders</td></tr>
+<tr><td>Configuration</td><td><code>src/config.py</code></td><td>Dataclass-based config management, env loading</td><td>pydantic, python-dotenv</td></tr>
+<tr><td>IOC Extractor</td><td><code>src/analyzers/ioc_extractor.py</code></td><td>Regex-based extraction of IPs, domains, file hashes</td><td>re (stdlib)</td></tr>
+<tr><td>Alert Classifier</td><td><code>src/analyzers/alert_classifier.py</code></td><td>LLM-powered severity/category classification</td><td>langchain-openai, openai</td></tr>
+<tr><td>Threat Intel</td><td><code>src/analyzers/threat_intel.py</code></td><td>VirusTotal, AbuseIPDB, OTX API lookups</td><td>requests</td></tr>
+<tr><td>Event Correlator</td><td><code>src/analyzers/correlation.py</code></td><td>Temporal and IOC-based event correlation</td><td>Internal models</td></tr>
+<tr><td>Splunk Connector</td><td><code>src/connectors/splunk.py</code></td><td>Splunk REST API integration</td><td>requests</td></tr>
+<tr><td>Sentinel Connector</td><td><code>src/connectors/sentinel.py</code></td><td>Microsoft Sentinel incident/alert API</td><td>requests</td></tr>
+<tr><td>Elastic Connector</td><td><code>src/connectors/elastic.py</code></td><td>Elastic Security signal APIs</td><td>requests</td></tr>
+<tr><td>Playbook Runner</td><td><code>src/responders/playbook_runner.py</code></td><td>YAML playbook execution engine with conditional steps</td><td>pyyaml</td></tr>
+<tr><td>Ticket Creator</td><td><code>src/responders/ticket_creator.py</code></td><td>Jira/ServiceNow ticket creation with full context</td><td>requests</td></tr>
+<tr><td>Notifier</td><td><code>src/responders/notifier.py</code></td><td>Slack/Teams/PagerDuty/Email notifications</td><td>requests</td></tr>
+</tbody>
+</table>
+
+<h2>Data Flow / Request Flow</h2>
+<div class="section-box">
+<ol style="padding-left:1.5rem;color:#ccc">
+<li><strong>Alert Ingestion</strong> -- Alerts arrive from Splunk, Sentinel, Elastic, or a generic webhook receiver. Each connector normalizes to a <code>SecurityAlert</code> dataclass.</li>
+<li><strong>IOC Extraction</strong> -- The IOC extractor scans alert titles, descriptions, and raw data for IPs, domains, URLs, and file hashes using compiled regex patterns.</li>
+<li><strong>LLM Classification</strong> -- The alert classifier sends the normalized alert to GPT-4o via LangChain, returning severity (critical/high/medium/low/info), category (brute_force, malware, phishing, etc.), and recommended actions.</li>
+<li><strong>Threat Intel Enrichment</strong> -- Extracted IOCs are concurrently looked up against VirusTotal, AbuseIPDB, and AlienVault OTX. Reputation scores and context are attached.</li>
+<li><strong>Event Correlation</strong> -- The correlator groups alerts by shared IOCs and temporal proximity (configurable window, default 60 min), producing correlation clusters.</li>
+<li><strong>Automated Response</strong> -- If severity meets the auto-respond threshold and auto-response is enabled, the playbook runner executes the matching YAML playbook. Tickets are created in Jira/ServiceNow. Notifications are dispatched to configured channels.</li>
+<li><strong>Triage Result</strong> -- A structured <code>TriageResult</code> is returned containing classification, enrichment data, correlation info, and action results.</li>
+</ol>
+</div>
+
+<h2>Security Controls</h2>
+<table>
+<thead><tr><th>Control</th><th>Implementation</th></tr></thead>
+<tbody>
+<tr><td>API Key Management</td><td>Environment variables via python-dotenv; no hardcoded secrets</td></tr>
+<tr><td>Auto-Response Gating</td><td><code>enable_auto_response</code> defaults to False; requires explicit opt-in</td></tr>
+<tr><td>Severity Threshold</td><td><code>auto_respond_threshold</code> prevents automated action on low-severity alerts</td></tr>
+<tr><td>Playbook Conditions</td><td>Each step has a <code>condition</code> field (e.g., <code>confidence > 0.7</code>) and <code>on_failure</code> handling</td></tr>
+<tr><td>SIEM Auth</td><td>Username/password or API key auth per SIEM connector</td></tr>
+<tr><td>Webhook Receiver</td><td>Flask-based, intended to run behind reverse proxy with TLS</td></tr>
+<tr><td>Input Validation</td><td>Pydantic v2 models for all alert and config structures</td></tr>
+<tr><td>MITRE ATT&CK Mapping</td><td>Alert classifications map to MITRE ATT&CK techniques for standardized reporting</td></tr>
+</tbody>
+</table>
+
+<h2>Industry Adaptation</h2>
+<div class="industry-grid">
+<div class="industry-card"><h4>Healthcare</h4><p>HIPAA-relevant alert categories (PHI access anomalies, medical device network alerts). Playbooks for patient data breach containment with mandated notification timelines.</p></div>
+<div class="industry-card"><h4>Finance</h4><p>PCI-DSS and SOX compliance alert classification. Fraud detection correlation, wire transfer anomaly playbooks, regulatory incident reporting integration.</p></div>
+<div class="industry-card"><h4>Government</h4><p>FedRAMP / NIST 800-53 control mapping. CUI/FOUO data exfiltration detection. CISA incident reporting automation. GovCloud SIEM connector support.</p></div>
+<div class="industry-card"><h4>Retail</h4><p>POS intrusion detection, supply chain compromise alerts. PCI scope monitoring, customer data breach playbooks with notification workflows.</p></div>
+<div class="industry-card"><h4>SaaS</h4><p>Multi-tenant alert isolation, API abuse detection, credential stuffing correlation. SOC2 evidence collection for audit trails.</p></div>
+</div>
+
+<h2>Production Readiness Checklist</h2>
+<ul class="checklist">
+<li>Configure SIEM connector with production credentials and verify alert ingestion</li>
+<li>Set OPENAI_API_KEY and validate LLM classification accuracy on sample alerts</li>
+<li>Register threat intel API keys (VirusTotal, AbuseIPDB, OTX)</li>
+<li>Customize YAML playbooks for organization-specific response procedures</li>
+<li>Register action handlers in PlaybookRunner for each action type</li>
+<li>Configure ticketing system (Jira/ServiceNow) credentials and project mapping</li>
+<li>Set up notification channels (Slack/Teams/PagerDuty webhooks)</li>
+<li>Test with <code>enable_auto_response=False</code> in dry-run mode</li>
+<li>Deploy behind TLS-terminating reverse proxy for webhook endpoint</li>
+<li>Set up monitoring, logging, and alerting for the triage engine itself</li>
+<li>Configure log retention and audit trail for compliance</li>
+</ul>
+
+<h2>Configuration / Environment Variables</h2>
+<table class="env-table">
+<thead><tr><th>Variable</th><th>Required</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>OPENAI_API_KEY</code></td><td>Yes</td><td>--</td><td>OpenAI API key for alert classification</td></tr>
+<tr><td><code>SIEM_PROVIDER</code></td><td>No</td><td>splunk</td><td>SIEM platform: splunk, sentinel, elastic</td></tr>
+<tr><td><code>SPLUNK_HOST</code></td><td>No</td><td>localhost</td><td>Splunk instance hostname</td></tr>
+<tr><td><code>SPLUNK_USERNAME</code></td><td>No</td><td>--</td><td>Splunk username</td></tr>
+<tr><td><code>SPLUNK_PASSWORD</code></td><td>No</td><td>--</td><td>Splunk password</td></tr>
+<tr><td><code>VIRUSTOTAL_API_KEY</code></td><td>No</td><td>--</td><td>VirusTotal API key for IOC lookups</td></tr>
+<tr><td><code>ABUSEIPDB_API_KEY</code></td><td>No</td><td>--</td><td>AbuseIPDB API key for IP reputation</td></tr>
+<tr><td><code>OTX_API_KEY</code></td><td>No</td><td>--</td><td>AlienVault OTX API key</td></tr>
+<tr><td><code>TICKET_BASE_URL</code></td><td>No</td><td>--</td><td>Jira/ServiceNow base URL</td></tr>
+<tr><td><code>TICKET_API_KEY</code></td><td>No</td><td>--</td><td>Ticketing system API key</td></tr>
+<tr><td><code>SLACK_WEBHOOK_URL</code></td><td>No</td><td>--</td><td>Slack incoming webhook for notifications</td></tr>
+<tr><td><code>TEAMS_WEBHOOK_URL</code></td><td>No</td><td>--</td><td>Teams incoming webhook</td></tr>
+<tr><td><code>PAGERDUTY_API_KEY</code></td><td>No</td><td>--</td><td>PagerDuty Events API routing key</td></tr>
+</tbody>
+</table>
+
+<h2>Deployment</h2>
+<div class="section-grid">
+<div class="section-box">
+<h3>Local Development</h3>
+<pre><code>git clone https://github.com/your-org/ai-agent-soc-triage.git
+cd ai-agent-soc-triage
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[webhook,dev]"
+cp .env.example .env
+# Edit .env with credentials
+python -m examples.analyze_alert</code></pre>
+</div>
+<div class="section-box">
+<h3>Production Service</h3>
+<pre><code># Run as a service with webhook ingestion
+# Deploy behind nginx/Caddy with TLS
+# Use systemd/supervisor for process management
+# Enable auto_respond after playbook validation
+# Set up cron for scheduled SIEM polling</code></pre>
+</div>
+</div>
+
+<h2>Links</h2>
+<table>
+<tbody>
+<tr><td>Repository</td><td><a href="https://github.com/your-org/ai-agent-soc-triage">github.com/your-org/ai-agent-soc-triage</a></td></tr>
+<tr><td>README</td><td><a href="../README.md">README.md</a></td></tr>
+<tr><td>Changelog</td><td><a href="../CHANGELOG.md">CHANGELOG.md</a></td></tr>
+<tr><td>License</td><td><a href="../LICENSE">MIT License</a></td></tr>
+</tbody>
+</table>
+
+<footer>
+Generated on 2026-03-15 | ai-agent-soc-triage v0.1.0 | Architecture Documentation
+</footer>
+
+</div>
+</body>
+</html>
