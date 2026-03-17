@@ -1,3 +1,7 @@
+![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![GitHub release](https://img.shields.io/github/v/release/kogunlowo123/ai-agent-soc-triage)
+
 # AI Agent SOC Triage
 
 A Python-based Security Operations Center (SOC) triage agent that uses LLMs to analyze security alerts, extract indicators of compromise, correlate events, look up threat intelligence, and execute automated response playbooks. Cloud-agnostic with support for Splunk, Microsoft Sentinel, and Elastic SIEM.
